@@ -76,7 +76,7 @@ public class JuiceShopTest extends BaseTest {
 
         // Güvenlik Sorusu Seçimi
         getDriver().findElement(By.name("securityQuestion")).click();
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-option//span[contains(text(), 'favorite pet')]"))).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//mat-option[contains(., 'favorite pet')]"))).click();
         getDriver().findElement(By.id("securityAnswerControl")).sendKeys(testUser.getSecurityAnswer());
 
         // Kayıt Ol Butonuna Tıkla
