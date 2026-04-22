@@ -2,9 +2,12 @@ package com.bestamibakir;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -17,17 +20,22 @@ public class BaseTest {
     // Bu sayede paralel test koşumlarında driver'ların birbirine karışmasını (race condition) önlüyoruz.
     protected static ThreadLocal<WebDriver> driver = new ThreadLocal<>();
 
+    @Parameters("browser")
     @BeforeMethod
-    public void setup() throws MalformedURLException {
-        ChromeOptions options = new ChromeOptions();
-        
-        // Selenium Grid'in Docker network üzerindeki adresi. 
-        // "selenium-hub" yerine docker-compose dosyanızdaki grid servisinin adını kullanmalısınız.
-        // Aynı ağda oldukları için container isimleriyle (hostname) haberleşebilirler.
+    public void setup(@Optional("chrome") String browser) throws MalformedURLException {
         URL gridUrl = URI.create("http://selenium-hub:4444/wd/hub").toURL();
         
-        // RemoteWebDriver oluşturup ThreadLocal içine set ediyoruz.
-        driver.set(new RemoteWebDriver(gridUrl, options));
+        if (browser.equalsIgnoreCase("chrome")) {
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.setCapability("se:name", "Test on Grid - Chrome");
+            driver.set(new RemoteWebDriver(gridUrl, chromeOptions));
+        } else if (browser.equalsIgnoreCase("firefox")) {
+            FirefoxOptions firefoxOptions = new FirefoxOptions();
+            firefoxOptions.setCapability("se:name", "Test on Grid - Firefox");
+            driver.set(new RemoteWebDriver(gridUrl, firefoxOptions));
+        } else {
+            throw new IllegalArgumentException("Browser configuration is not defined for: " + browser);
+        }
         
         getDriver().manage().window().maximize();
         getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
