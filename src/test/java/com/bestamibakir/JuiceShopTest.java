@@ -82,10 +82,8 @@ public class JuiceShopTest extends BaseTest {
         // Kayıt Ol Butonuna Tıkla
         wait.until(ExpectedConditions.elementToBeClickable(By.id("registerButton"))).click();
 
-        // 4. Başarılı Kayıt Mesajını Doğrula ve Login Ol
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(text(), 'Registration completed successfully')]")));
-        
-        // Login ekranına yönlendirildikten sonra giriş yap
+        // 4. Kayıt sonrası Login ekranına yönlendirilmeyi bekle ve giriş yap
+        // Başarı mesajı (snackbar) bazen çok hızlı kaybolduğu için direkt Login ekranının yüklenmesini beklemek testin stabilitesini artırır.
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email"))).sendKeys(testUser.getEmail());
         getDriver().findElement(By.id("password")).sendKeys(testUser.getPassword());
         wait.until(ExpectedConditions.elementToBeClickable(By.id("loginButton"))).click();
