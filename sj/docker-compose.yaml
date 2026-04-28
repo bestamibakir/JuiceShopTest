@@ -1,0 +1,84 @@
+services:
+  jenkins:
+      image: jenkins/jenkins:lts
+      privileged: true
+      user: root
+      ports:
+       - 8080:8080
+       - 50000:50000
+      container_name: jenkins
+      volumes:
+        - ./jenkins-configuration:/var/jenkins_home
+      networks:
+      - sj-net
+  
+  selenium-hub:
+    image: seleniarm/hub:latest
+    ports:
+      - "4444:4444"
+    networks:
+      - sj-net
+
+  juice-shop:
+    image: bkimminich/juice-shop
+    ports:
+      - 3000:3000
+    networks:
+      - sj-net
+
+  chrome:
+    image: seleniarm/node-chromium:latest
+    shm_size: 2gb
+    ports:
+      - "7900:7900"
+    depends_on:
+      - selenium-hub
+    networks:
+      - sj-net
+    environment:
+      - SE_VNC_NO_PASSWORD=1
+      - SE_START_VNC=true
+      - SE_START_NO_VNC=true
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_INSTANCES=1
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_SESSION_TIMEOUT=180
+
+  firefox:
+    image: seleniarm/node-firefox:latest
+    shm_size: 2gb
+    ports:
+      - "7901:7900"
+    depends_on:
+      - selenium-hub
+    networks:
+      - sj-net
+    environment:
+      - SE_VNC_NO_PASSWORD=1
+      - SE_START_VNC=true
+      - SE_START_NO_VNC=true
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_INSTANCES=1
+      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_SESSION_TIMEOUT=180
+  
+  agent:
+      image: jenkins/ssh-agent:latest-jdk21
+      privileged: true
+      user: root
+      container_name: agent
+      expose:
+        - 22
+      environment:
+      - JENKINS_AGENT_SSH_PUBKEY=${JENKINS_AGENT_SSH_PUBKEY}
+      networks:
+      - sj-net
+
+networks:
+  sj-net:
+    external: true
+

@@ -39,3 +39,9 @@ build/
 .DS_Store
 ._*
 **/._*
+
+### Docker & Jenkins ###
+sj/jenkins-configuration/
+sj/.env
+sj/Jenkins-agent
+sj/Jenkins-agent.pub
